@@ -1,4 +1,4 @@
-name: Devco-DevSecOps
+name: Build
 on:
   push:
     branches:
@@ -16,7 +16,6 @@ jobs:
       - name: Unit Tests
         run: |
           python -m unittest discover tests
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

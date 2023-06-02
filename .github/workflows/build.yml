@@ -1,0 +1,45 @@
+name: Devco-DevSecOps
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Unit Tests
+        run: |
+          python -m unittest discover tests
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build-and-push:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout código fuente
+          uses: actions/checkout@v2
+
+        - name: Docker Login
+          uses: docker/login-action@v2.1.0
+          with:
+            username: ${{ secrets.DOCKERHUB_USER }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+  
+        - name: Construir y empujar imagen de Docker
+          uses: docker/build-push-action@v2
+          with:
+            context: .
+            push: true
+            tags: ${{ secrets.DOCKERHUB_USER }}/devcopruebas:1.0.0
+
+
